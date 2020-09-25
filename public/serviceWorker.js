@@ -1,3 +1,5 @@
+
+
 self.addEventListener('install', function(e){
   e.waitUntil(caches.open('pushNotification').then(function(cache){
       console.log("cahces "+JSON.stringify(cache));
@@ -14,11 +16,38 @@ self.addEventListener('fetch', function(event){
 }); 
 
 self.addEventListener('push', function(event) {
-  console.log(event.data.text())
-  let message = event.data.text(); //
-  event.waitUntil(
-    self.registration.showNotification(message.title, {
-      body: message.body,
-    })
-  );
+  
+  isTabActive().then((result) => {
+    console.log(result)
+    if(!result) {
+      const promiseChain = self.registration.showNotification('Hello, World.');
+      event.waitUntil(promiseChain);
+    }
+  })
+
+    
 });
+
+
+function isTabActive() {
+  const isActive = this.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  })
+  .then(function(windowClients) {
+  
+  var clientIsVisible = false;
+  for (var i = 0; i < windowClients.length; i++) {
+   const windowClient = windowClients[i];
+  
+   if (windowClient.visibilityState==="visible") {
+       clientIsVisible = true;
+  
+     break;
+   }
+  }
+  
+  return clientIsVisible;
+  });
+  return isActive
+}

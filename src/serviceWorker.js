@@ -158,18 +158,13 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 
-export function subscribeUserToPush(key) {
-  const swPath = `${process.env.PUBLIC_URL}/serviceWorker.js`;
-  if ('serviceWorker' in navigator && process.env.NODE_ENV !== 'production') {
-    window.addEventListener('load', function () {
-      
+export function register() {
+  const swPath = `/serviceWorker.js`;
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {     
       navigator.serviceWorker.register(swPath).then(registration => {
         console.log('Service worker registered');
-        const subscribeOptions = {
-                     userVisibleOnly: true,
-                     applicationServerKey: urlBase64ToUint8Array('BP-HmCF4giJVZkWsxilER7S0_YDijywpvS7Q-1XrXDVQzbmZFzWFlr_MT2-rpO0kBZ_6A8yMDyOaa0gi29wdaMg'),
-              };
-        return registration.pushManager.subscribe(subscribeOptions)
+        return subscribeUserToPush(registration)
       }).then(function(pushSubscription) {
           console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
           //return pushSubscription;
@@ -177,6 +172,14 @@ export function subscribeUserToPush(key) {
          });;
     });
   }
+}
+
+function subscribeUserToPush(registration) {
+  const subscribeOptions = {
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array('BP-HmCF4giJVZkWsxilER7S0_YDijywpvS7Q-1XrXDVQzbmZFzWFlr_MT2-rpO0kBZ_6A8yMDyOaa0gi29wdaMg'),
+  };
+  return registration.pushManager.subscribe(subscribeOptions)
 }
 
 function sendSubscriptionToBackEnd(subscription) {
@@ -200,15 +203,3 @@ function sendSubscriptionToBackEnd(subscription) {
     }
   });
 }
-
-
-
-// self.addEventListener('push', function(event) {
-//   console.log(124)
-//   let message = JSON.parse(event.data.text()); //
-//   event.waitUntil(
-//     self.registration.showNotification(message.title, {
-//       body: message.body,
-//     })
-//   );
-// });
